@@ -4,8 +4,10 @@ var camera, scene, renderer;
 var uniforms;
 var startTime;
 
-init(); //init scene
-animate(); //updateScene
+document.addEventListener("DOMContentLoaded", ()=>{
+	init();
+	animate();
+}, false);
 
 function init() {
 	//get contenaire
