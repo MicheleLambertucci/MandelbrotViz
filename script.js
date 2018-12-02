@@ -23,7 +23,8 @@ function init() {
 	
 	//create uniform table which provide all our GLSL binding
 	uniforms = {
-		padding: {type: "v2", value: new THREE.Vector2(window.innerWidth/2, window.innerHeight/2)},
+		resolution: { type: "v2", value: new THREE.Vector2() },
+		padding: {type: "v2", value: new THREE.Vector2(0, 0)},
 		zoom: { type: "f", value: 100.0 },
 	};
 	
@@ -58,19 +59,23 @@ function init() {
 
 let drag = false;
 function onDrag(event){
-	uniforms.padding.value.x += event.movementX;
-	uniforms.padding.value.y -= event.movementY;
+	uniforms.padding.value.x -= event.movementX / uniforms.zoom.value;
+	uniforms.padding.value.y += event.movementY / uniforms.zoom.value;
 }
 
+let zoomFactor = 0;
 function zoomView(event){
-	uniforms.zoom.value -= event.deltaY;
+	zoomFactor -= event.deltaY/100;
+	uniforms.zoom.value = 100 * Math.exp(zoomFactor * 0.1)
 	if(uniforms.zoom.value < 100){
 		uniforms.zoom.value = 100;
+		zoomFactor = 0;
 	}
 }
 
 function onWindowResize(event) {
-	//send new size value to the shader and resize the window
+	uniforms.resolution.value.x = window.innerWidth;
+	uniforms.resolution.value.y = window.innerHeight;
 	renderer.setSize(window.innerWidth, window.innerHeight);
 }
 

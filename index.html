@@ -17,11 +17,12 @@
     
     <!-- simple fragment shader -->
     <script id="fragmentShader" type="x-shader/x-fragment">
-		#define MAX_STEPS 400
-		#define THRESHOLD 1e3
+		#define MAX_STEPS 1000
+		#define THRESHOLD 1e4
 		
 		uniform float zoom;
 		uniform vec2 padding;
+		uniform vec2 resolution;
 		
 		vec2 cmpxmul(vec2 a, vec2 b){
 			return vec2(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
@@ -38,11 +39,15 @@
 			return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 		}
 		
+		vec2 applyTransf(vec2 pos){
+			return padding + (pos-resolution.xy/2.0)/zoom;
+		}
+
 		void main(){
 			
 			vec2 tmp;
 			for(int step = 0; step < MAX_STEPS; step++){
-				tmp = f((gl_FragCoord.xy - padding) / zoom, tmp);
+				tmp = f(applyTransf(gl_FragCoord.xy), tmp);
 				if(length(tmp) > THRESHOLD){
 					vec3 hsv = vec3(float(step) / float(MAX_STEPS), 1.0, 1.0);
 					gl_FragColor = vec4(hsv2rgb(hsv), 1.0);
