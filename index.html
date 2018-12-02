@@ -1,0 +1,56 @@
+<!-- Mandelbrot renderer in WebGL, based on Three JS simple shader template based on Kyle McDonald exemple : https://gist.github.com/kylemcdonald/9593057 -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r61/three.min.js"></script>
+    <script src="script.js"></script>
+  </head>
+  <body><div id="container"></div>
+    <!-- simple vertex shader -->
+    <script id="vertexShader" type="x-shader/x-vertex">
+      void main() {
+        gl_Position = vec4(position, 1.0);
+      }
+    </script>
+    
+    <!-- simple fragment shader -->
+    <script id="fragmentShader" type="x-shader/x-fragment">
+		#define MAX_STEPS 400
+		#define THRESHOLD 1e3
+		
+		uniform float zoom;
+		uniform vec2 padding;
+		
+		vec2 cmpxmul(vec2 a, vec2 b){
+			return vec2(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
+		}
+		
+		vec2 f(vec2 c, vec2 z){
+			return cmpxmul(z, z) + c;
+		}
+		
+		// Thanks to `www.laurivan.com` for this little function
+		vec3 hsv2rgb(vec3 c){
+			vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+			vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+			return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+		}
+		
+		void main(){
+			
+			vec2 tmp;
+			for(int step = 0; step < MAX_STEPS; step++){
+				tmp = f((gl_FragCoord.xy - padding) / zoom, tmp);
+				if(length(tmp) > THRESHOLD){
+					vec3 hsv = vec3(float(step) / float(MAX_STEPS), 1.0, 1.0);
+					gl_FragColor = vec4(hsv2rgb(hsv), 1.0);
+					return;
+				}
+			}
+			gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+			
+		}
+    </script>
+  </body>
+</html>
